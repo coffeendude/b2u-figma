@@ -304,5 +304,12 @@ export default config;```
 
 After downloaded and unzipped, drag and drop into root of project and choose "copy folder" not "add"
 
+* Delete lib and public from root of directory as they are now set in assets
+* Then drag and drop the following dirs into root:
+    * constants
+    * lib
+    * public
+    * types
 
+* Delete original favicon and place the new one in assets in the app dir
 
