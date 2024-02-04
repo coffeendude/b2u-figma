@@ -1,7 +1,12 @@
-import { Room } from "./Room";
+"use client";
+
+import Live from "@/components/Live";
+
 
 export default function Page() {
   return (
-    <h1 className="text-5xl text-white">B2U-Figma</h1>
+    <div>
+      <Live />
+    </div>
   );
 }

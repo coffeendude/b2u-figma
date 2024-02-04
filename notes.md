@@ -24,7 +24,7 @@
 * The last thing we need to do is install shadcn - which we will use for our ui library
 * Ref: ui.shadcn.com
 * Run the shadcn-ui init command to setup your project:
-`Run the shadcn-ui init command to setup your project:`
+`npx shadcn-ui@latest init`
 * You will be asked a few questions to configure components.json:
 
 ``` Would you like to use TypeScript (recommended)? no / yes
@@ -298,6 +298,7 @@ export default config;```
 
 * Also want to note that we are using this for some styling as well @import "@liveblocks/react-comments/styles.css";
 * ..so we will need to install it:
+
 `npm install @liveblocks/react-comments`
 
 * We also need to go to the ReadME ref page and find the zipped assets to download. Here: https://drive.google.com/file/d/17tRs0sEiIsCeTYEXhWEdHMrTshuz2oYf/view?pli=1 
@@ -312,4 +313,10 @@ After downloaded and unzipped, drag and drop into root of project and choose "co
     * types
 
 * Delete original favicon and place the new one in assets in the app dir
+
+
+
+# Setup LiveCursors from LiveBlocks
+
+* It allows us to know if/when someone in the same group is using the figma same project that 
 
