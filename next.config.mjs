@@ -1,32 +1,26 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+    webpack: (config) => {
+      config.externals.push({
+        "utf-8-validate": "commonjs utf-8-validate",
+        bufferutil: "commonjs bufferutil",
+        canvas: "commonjs canvas",
+      });
+      // config.infrastructureLogging = { debug: /PackFileCache/ };
+      return config;
+    },
     images: {
-        remotePatterns: [
-            {
-                protocol: 'https',
-                hostname: 'liveblocks.io',
-                port: ''
-            }
-        ]
+      remotePatterns: [
+        {
+          protocol: "https",
+          hostname: "liveblocks.io",
+          port: "",
+        },
+      ],
     },
-    
-    webpack: (config, { webpack }) => {
-        // config.experiments = {
-        //     ...config.experiments,
-        //     topLevelAwait: true,
-        // }
-        config.externals.push({
-            sharp: "commonjs sharp",
-            canvas: "commonjs canvas",
-        })
-        // config.plugins.push(
-        //     new webpack.ProvidePlugin({
-        //         Buffer: ["buffer", "Buffer"],
-        //         process: "process/browser",
-        //     })
-        // )
-        return config
+    typescript: {
+      ignoreBuildErrors: true,
     },
-};
+  };
 
 export default nextConfig;

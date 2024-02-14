@@ -7,8 +7,8 @@ import Live from "@/components/Live";
 import Navbar from "@/components/Navbar";
 import RightSidebar from "@/components/RightSidebar";
 import { use, useEffect, useRef, useState } from "react";
-import { handleCanvasMouseDown, handleCanvaseMouseMove, handleCanvasMouseUp, handleResize, initializeFabric, renderCanvas, handleCanvasObjectModified, handleCanvasObjectMoving } from "@/lib/canvas";
-import { ActiveElement } from "@/types/type";
+import { handleCanvasMouseDown, handleCanvaseMouseMove, handleCanvasMouseUp, handleResize, initializeFabric, renderCanvas, handleCanvasObjectModified, handleCanvasObjectMoving, handleCanvasSelectionCreated, handleCanvasObjectScaling } from "@/lib/canvas";
+import { ActiveElement, Attributes } from "@/types/type";
 import { useMutation, useRedo, useStorage, useUndo } from "@/liveblocks.config";
 import { defaultNavElement } from "@/constants";
 import { handleDelete, handleKeyDown } from "@/lib/key-events";
@@ -34,8 +34,20 @@ export default function Page() {
   // Image object
   const imageInputRef = useRef<HTMLInputElement>(null);
 
+  const isEditingRef = useRef(false);
+
   // This hook by liveblocks allows us to store data in key/value stores and automatically sync it to other users
   const canvasObjects = useStorage((root) => root.canvasObjects)
+
+  const [elementAttributes, setElementAttributes] = useState<Attributes >({
+    width: '',
+    height: '',
+    fontSize: '',
+    fontFamily: '',
+    fontWeight: '',
+    fill: '#aabbcc',
+    stroke: '#aabbcc',
+  })
 
   // This is how we update live objects
   const syncShapeInStorage = useMutation(({ storage }, object) => {
@@ -61,17 +73,22 @@ export default function Page() {
     name: '',
     value: '',
     icon: '',
-  })
+  });
 
+  // This is how we delete all shapes from the canvas
   const deleteAllShapes = useMutation(({ storage }) => {
-    const canvasObjects = storage.get('canvasObjects');
+    // get the canvasObjects store
+    const canvasObjects = storage.get("canvasObjects");
 
+    // if the store doesn't exist or is empty, return
     if (!canvasObjects || canvasObjects.size === 0) return true;
 
-    for (const [key, value] of canvasObjects) {
+    // delete all the shapes from the store
+    for (const [key, value] of canvasObjects.entries()) {
       canvasObjects.delete(key);
     }
 
+    // return true if the store is empty
     return canvasObjects.size === 0;
   }, []);
 
@@ -115,10 +132,10 @@ export default function Page() {
         break;
 
       default:
+        // set the selected shape to the selected element
+        selectedShapeRef.current = elem?.value as string;
         break;
     }
-
-    selectedShapeRef.current = elem?.value as string;
   }
 
   // When we leave the dependency array empty, the effect will only run once when the component mounts (at the start)
@@ -133,7 +150,7 @@ export default function Page() {
       handleCanvaseMouseMove({ canvas, isDrawing, options, shapeRef, selectedShapeRef, syncShapeInStorage });
     })
 
-    canvas.on('mouse:up', (options) => {
+    canvas.on('mouse:up', () => {
       handleCanvasMouseUp({ canvas, isDrawing, shapeRef, selectedShapeRef, syncShapeInStorage, setActiveElement, activeObjectRef });
     })
 
@@ -141,6 +158,35 @@ export default function Page() {
       handleCanvasObjectModified({
         options,
         syncShapeInStorage
+      })
+    })
+
+    canvas.on("object:scaling", (options) => {
+      handleCanvasObjectScaling({
+        options,
+        setElementAttributes
+      })
+    })
+
+    /**
+     * listen to the object moving event on the canvas which is fired
+     * when the user moves an object on the canvas.
+     *
+     * Event inspector: http://fabricjs.com/events
+     * Event list: http://fabricjs.com/docs/fabric.Canvas.html#fire
+     */
+    canvas?.on("object:moving", (options) => {
+      handleCanvasObjectMoving({
+        options,
+      });
+    });
+
+    canvas.on("selection:created", (options: any) => {
+      handleCanvasSelectionCreated({
+        options,
+        isEditingRef,
+        setElementAttributes,
+      
       })
     })
 
@@ -177,9 +223,27 @@ export default function Page() {
 
     return () => {
       canvas.dispose();
-    }
 
-  }, []);
+      // remove the event listeners
+      window.removeEventListener("resize", () => {
+        handleResize({
+          canvas: null,
+        });
+      });
+
+      window.removeEventListener("keydown", (e) =>
+        handleKeyDown({
+          e,
+          canvas: fabricRef.current,
+          undo,
+          redo,
+          syncShapeInStorage,
+          deleteShapeFromStorage,
+        })
+      );
+    };
+
+  }, [canvasRef]);
 
   // Re-render objects everytime there's a change in the canvasObjects
   useEffect(() => {
@@ -212,7 +276,14 @@ export default function Page() {
       <section className="flex h-full flex-row">
         <LeftSidebar allShapes={Array.from(canvasObjects)} />
         <Live canvasRef={canvasRef} />
-        <RightSidebar />
+        <RightSidebar 
+          elementAttributes={elementAttributes}
+          setElementAttributes={setElementAttributes}
+          fabricRef={fabricRef}
+          isEditingRef={isEditingRef}
+          activeObjectRef={activeObjectRef}
+          syncShapeInStorage={syncShapeInStorage}
+        />
       </section>
     </main>
   );

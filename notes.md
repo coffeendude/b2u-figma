@@ -258,8 +258,7 @@ export default config;```
   body {
     @apply bg-background text-foreground;
   }
-}
-```
+}```
 
 
 *To: *
@@ -320,3 +319,17 @@ After downloaded and unzipped, drag and drop into root of project and choose "co
 
 * It allows us to know if/when someone in the same group is using the figma same project that 
 
+
+# Now we need to import some other shad-cn components
+* select
+* label
+* input
+
+## We use this command to install the 'types':
+* fabric
+
+`npm i --save-dev @types/fabric`
+
+* uuid
+
+`npm i --save-dev @types/uuid`

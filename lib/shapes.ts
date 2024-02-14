@@ -96,6 +96,10 @@ export const handleImageUpload = ({
   shapeRef,
   syncShapeInStorage,
 }: ImageUpload) => {
+  if (!(file instanceof Blob)) {
+    console.error('File is not a Blob:', file);
+    return;
+  }
   const reader = new FileReader();
 
   reader.onload = () => {
